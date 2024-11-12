@@ -18,7 +18,7 @@ tasks:
       TALHELPER_SECRET_EXISTS:
         sh: test -f {{.TALHELPER_SECRET_FILE}} && echo true || echo false
     cmds:
-      - >
+      - |
         if [ "{{.TALHELPER_SECRET_EXISTS}}" = "true" ]; then
           echo "Talos secret already exists. Skipping..."
         else
@@ -36,10 +36,10 @@ tasks:
     prompt: This will generate Talos configuration... Continue?
     dir: '{{.TALOS_DIR}}'
     vars:
-      ENCRYPTED_FILES:
+      SECRET_FILES:
         sh: find "{{.TALOS_DIR}}" -type f -name '*.sops.yaml' ! -name ".sops.yaml"
     cmds:
-      - for: { var: ENCRYPTED_FILES }
+      - for: { var: SECRET_FILES }
         cmd: |
           if sops filestatus "{{.ITEM}}" | jq --exit-status ".encrypted == false" &>/dev/null; then
               echo "Encrypting {{ .ITEM }}"

@@ -7,6 +7,20 @@ vars:
 
 tasks:
 
+  age-keygen:
+    desc: Bootstrap the Sops Age Key and update configuration file
+    cmds:
+      - age-keygen --output {{.SOPS_AGE_KEY_FILE}}
+      - |
+        # Extract the public key from the generated key file
+        PUBLIC_KEY=$(grep -oP 'public key: \K.*' {{.SOPS_AGE_KEY_FILE}})
+        # Update the .sops.yaml file with the new public key
+        sed -i "s|<add sops age key here>|$PUBLIC_KEY|" {{.SOPS_CONFIG_FILE}}
+    status:
+      - test -f {{.SOPS_AGE_KEY_FILE}}
+    preconditions:
+      - which age-keygen
+
   talos:
     desc: Bootstrap the Talos cluster
     prompt: This will bootstrap the Talos cluster... Continue?
@@ -14,7 +28,6 @@ tasks:
       - task: etcd
       - task: kubeconfig
       - task: apps
-      # - task: flux
     preconditions:
       - talosctl config info >/dev/null 2>&1
       - test -f {{.TALOSCONFIG}}
@@ -47,3 +60,24 @@ tasks:
       - test -f {{.KUBECONFIG}}
       - test -f {{.BOOTSTRAP_DIR}}/apps/helmfile.yaml
       - which helmfile kubectl
+
+  flux:
+    desc: Bootstrap Flux into the Talos cluster
+    prompt: This will bootstrap Flux... Continue?
+    vars:
+      SOPS_SECRET_EXISTS:
+        sh: kubectl --namespace flux-system get secret sops-age &>/dev/null && echo true || echo false
+    cmds:
+      - kubectl apply --server-side --kustomize {{.BOOTSTRAP_DIR}}/flux
+      - |
+        if [ "{{.SOPS_SECRET_EXISTS}}" = "false" ]; then
+          cat {{.SOPS_AGE_KEY_FILE}} | kubectl --namespace flux-system create secret generic sops-age --from-file=age.agekey=/dev/stdin
+        fi
+      - sops exec-file {{.KUBERNETES_DIR}}/flux/vars/cluster-secrets.sops.yaml "kubectl apply --server-side --filename {}"
+      - kubectl apply --server-side --filename {{.KUBERNETES_DIR}}/flux/vars/cluster-settings.yaml
+      - kubectl apply --server-side --kustomize {{.KUBERNETES_DIR}}/flux/config
+    preconditions:
+      - test -f {{.KUBECONFIG}}
+      - test -f {{.SOPS_AGE_KEY_FILE}}
+      - sops filestatus {{.KUBERNETES_DIR}}/flux/vars/cluster-secrets.sops.yaml | jq --exit-status '.encrypted'
+      - which flux kubectl sops
