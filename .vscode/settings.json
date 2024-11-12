@@ -58,7 +58,6 @@
   "files.associations": {
     "*.json5": "json5",
   },
-  "files.autoSave": "afterDelay",
   "files.trimTrailingWhitespace": true,
   "material-icon-theme.files.associations": {
     // TODO: https://github.com/PKief/vscode-material-icon-theme/issues/330
