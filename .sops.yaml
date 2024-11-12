@@ -4,8 +4,8 @@ creation_rules:
     encrypted_regex: "^(data|stringData)$"
     key_groups:
       - age:
-          - "age1q6dwex7sla2rylxu4346z758najcz5xpp3drtk0rcm3g0pskk95sf09wu3"
+          - "age1mqnqku2r3egl6r0yg7qckwvmc5gzj3kjq4tvvqg53flg3m92necqr9u5tf"
   - path_regex: talos/.*\.sops\.ya?ml
     key_groups:
       - age:
-          - "age1q6dwex7sla2rylxu4346z758najcz5xpp3drtk0rcm3g0pskk95sf09wu3"
+          - "age1mqnqku2r3egl6r0yg7qckwvmc5gzj3kjq4tvvqg53flg3m92necqr9u5tf"
