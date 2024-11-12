@@ -1,0 +1,49 @@
+---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+vars:
+  BOOTSTRAP_DIR: "{{.KUBERNETES_DIR}}/bootstrap"
+
+tasks:
+
+  talos:
+    desc: Bootstrap the Talos cluster
+    prompt: This will bootstrap the Talos cluster... Continue?
+    cmds:
+      - task: etcd
+      - task: kubeconfig
+      - task: apps
+      # - task: flux
+    preconditions:
+      - talosctl config info >/dev/null 2>&1
+      - test -f {{.TALOSCONFIG}}
+
+  etcd:
+    internal: true
+    cmd: until talhelper gencommand bootstrap --config-file {{.TALHELPER_CONFIG_FILE}} --env-file {{.TALHELPER_ENV_FILE}} --out-dir {{.TALHELPER_CLUSTER_DIR}} | bash; do sleep 10; done
+    preconditions:
+      - test -f {{.TALHELPER_CONFIG_FILE}}
+      - test -f {{.TALHELPER_ENV_FILE}}
+      - which talhelper
+
+  kubeconfig:
+    internal: true
+    cmd: until talhelper gencommand kubeconfig --config-file {{.TALHELPER_CONFIG_FILE}} --env-file {{.TALHELPER_ENV_FILE}} --out-dir {{.TALHELPER_CLUSTER_DIR}} --extra-flags="{{.KUBERNETES_DIR}} --force" | bash; do sleep 10; done
+    preconditions:
+      - test -f {{.TALHELPER_CONFIG_FILE}}
+      - test -f {{.TALHELPER_ENV_FILE}}
+      - which talhelper
+
+  apps:
+    internal: true
+    env:
+      KUBERNETES_DIR: "{{.KUBERNETES_DIR}}"
+    cmds:
+      - until kubectl wait --for=condition=Ready=False nodes --all --timeout=600s; do sleep 10; done
+      - helmfile --file {{.BOOTSTRAP_DIR}}/apps/helmfile.yaml apply --skip-diff-on-install --suppress-diff
+      - until kubectl wait --for=condition=Ready nodes --all --timeout=600s; do sleep 10; done
+    preconditions:
+      - test -f {{.KUBECONFIG}}
+      - test -f {{.BOOTSTRAP_DIR}}/apps/helmfile.yaml
+      - which helmfile kubectl

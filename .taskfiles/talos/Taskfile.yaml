@@ -1,0 +1,75 @@
+---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+vars:
+  TALHELPER_CLUSTER_DIR: "{{.TALOS_DIR}}/clusterconfig"
+  TALHELPER_CONFIG_FILE: "{{.TALOS_DIR}}/talconfig.yaml"
+  TALHELPER_ENV_FILE: "{{.TALOS_DIR}}/talenv.sops.yaml"
+  TALHELPER_SECRET_FILE: "{{.TALOS_DIR}}/talsecret.sops.yaml"
+
+tasks:
+
+  generate-secret:
+    desc: Generate Talos secret
+    prompt: This will create and encrypt Talos secret... Continue?
+    dir: '{{.TALOS_DIR}}'
+    vars:
+      TALHELPER_SECRET_EXISTS:
+        sh: test -f {{.TALHELPER_SECRET_FILE}} && echo true || echo false
+    cmds:
+      - >
+        if [ "{{.TALHELPER_SECRET_EXISTS}}" = "true" ]; then
+          echo "Talos secret already exists. Skipping..."
+        else
+          talhelper gensecret > {{.TALHELPER_SECRET_FILE}}
+          sops --encrypt --in-place {{.TALHELPER_SECRET_FILE}}
+        fi
+    preconditions:
+      - test -f {{.TALHELPER_CONFIG_FILE}}
+      - test -f {{.SOPS_AGE_KEY_FILE}}
+      - test -f {{.SOPS_CONFIG_FILE}}
+      - which talhelper sops
+
+  generate-config:
+    desc: Generate Talos config
+    prompt: This will generate Talos configuration... Continue?
+    dir: '{{.TALOS_DIR}}'
+    vars:
+      ENCRYPTED_FILES:
+        sh: find "{{.TALOS_DIR}}" -type f -name '*.sops.yaml' ! -name ".sops.yaml"
+    cmds:
+      - for: { var: ENCRYPTED_FILES }
+        cmd: |
+          if sops filestatus "{{.ITEM}}" | jq --exit-status ".encrypted == false" &>/dev/null; then
+              echo "Encrypting {{ .ITEM }}"
+              sops --encrypt --in-place "{{.ITEM}}"
+          fi
+      - talhelper genconfig --config-file {{.TALHELPER_CONFIG_FILE}} --env-file {{.TALHELPER_ENV_FILE}} --secret-file {{.TALHELPER_SECRET_FILE}} --out-dir {{.TALHELPER_CLUSTER_DIR}}
+    preconditions:
+      - test -f {{.TALHELPER_CONFIG_FILE}}
+      - test -f {{.TALHELPER_ENV_FILE}}
+      - test -f {{.TALHELPER_SECRET_FILE}}
+      - test -f {{.SOPS_AGE_KEY_FILE}}
+      - test -f {{.SOPS_CONFIG_FILE}}
+      - which talhelper sops
+
+  apply-config:
+    desc: Apply Talos configuration to the nodes
+    prompt: This will apply Talos configuration to ALL nodes... Continue?
+    dir: '{{.TALOS_DIR}}'
+    cmd: talhelper gencommand apply --config-file {{.TALHELPER_CONFIG_FILE}} --env-file {{.TALHELPER_ENV_FILE}} --out-dir {{.TALHELPER_CLUSTER_DIR}} --extra-flags="--insecure" | bash
+    preconditions:
+      - test -f {{.TALHELPER_CONFIG_FILE}}
+      - test -f {{.TALHELPER_ENV_FILE}}
+      - test -f {{.TALHELPER_SECRET_FILE}}
+      - which talhelper
+
+  reset-cluster:
+    desc: Reset the Talos cluster
+    prompt: This will destroy the cluster and reset ALL nodes back to maintenance mode... Continue?
+    dir: '{{.TALOS_DIR}}'
+    cmd: talhelper gencommand reset --config-file {{.TALHELPER_CONFIG_FILE}} --env-file {{.TALHELPER_ENV_FILE}} --out-dir {{.TALHELPER_CLUSTER_DIR}} --extra-flags="--reboot --system-labels-to-wipe STATE --system-labels-to-wipe EPHEMERAL --graceful=false --wait=false" | bash
+    preconditions:
+      - test -f {{.TALHELPER_CONFIG_FILE}}
+      - which talhelper

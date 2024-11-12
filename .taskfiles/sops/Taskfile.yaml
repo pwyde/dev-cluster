@@ -1,12 +1,15 @@
 ---
 version: "3"
 
+vars:
+  SOPS_CONFIG_FILE: "{{.ROOT_DIR}}/.sops.yaml"
+
 tasks:
 
   encrypt-all:
     desc: Encrypt ALL secret files in current directory with Sops
     silent: true
-    dir: "{{.USER_WORKING_DIR}}"
+    dir: '{{.USER_WORKING_DIR}}'
     vars:
       SECRET_FILES:
         sh: find . -type f -name '*.sops.yaml' ! -name ".sops.yaml"
@@ -25,7 +28,7 @@ tasks:
   decrypt-all:
     desc: Decrypt ALL secret files in current directory with Sops
     silent: true
-    dir: "{{.USER_WORKING_DIR}}"
+    dir: '{{.USER_WORKING_DIR}}'
     vars:
       SECRET_FILES:
         sh: find . -type f -name '*.sops.yaml' ! -name ".sops.yaml"
