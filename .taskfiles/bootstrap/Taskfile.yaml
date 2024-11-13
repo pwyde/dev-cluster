@@ -3,23 +3,44 @@
 version: '3'
 
 vars:
+  BOOTSTRAP_RESOURCES_DIR: '{{.ROOT_DIR}}/.taskfiles/bootstrap/resources'
   BOOTSTRAP_DIR: "{{.KUBERNETES_DIR}}/bootstrap"
 
 tasks:
 
   age-keygen:
-    desc: Bootstrap the Sops Age Key and update configuration file
+    desc: Bootstrap the Sops age key and update configuration file, --force creates new key
+    vars:
+      PUBLIC_KEY:
     cmds:
-      - age-keygen --output {{.SOPS_AGE_KEY_FILE}}
       - |
-        # Extract the public key from the generated key file
-        PUBLIC_KEY=$(grep -oP 'public key: \K.*' {{.SOPS_AGE_KEY_FILE}})
-        # Update the .sops.yaml file with the new public key
-        sed -i "s|<add sops age key here>|$PUBLIC_KEY|" {{.SOPS_CONFIG_FILE}}
+        # Backup existing SOPS_AGE_KEY_FILE and SOPS_CONFIG_FILE if --force flag is used.
+        {{if .CLI_FORCE}}
+          if [ -f {{.SOPS_AGE_KEY_FILE}} ]; then
+            cp {{.SOPS_AGE_KEY_FILE}} {{.SOPS_AGE_KEY_FILE}}.bak
+            rm {{.SOPS_AGE_KEY_FILE}}
+          fi
+          if [ -f {{.SOPS_CONFIG_FILE}} ]; then
+            cp {{.SOPS_CONFIG_FILE}} {{.SOPS_CONFIG_FILE}}.bak
+            rm {{.SOPS_CONFIG_FILE}}
+          fi
+        {{end}}
+      - |
+        # Copy the Sops configuration template file to {{.ROOT_DIR}}/.sops.yaml
+        cp {{.BOOTSTRAP_RESOURCES_DIR}}/.sops.tmpl.yaml {{.SOPS_CONFIG_FILE}}
+      - |
+        # Generate new age key.
+        age-keygen --output {{.SOPS_AGE_KEY_FILE}}
+      - |
+        # Extract public key from the generated age key.
+        PUBLIC_KEY=$(awk '/public key:/ {print $NF}' {{.SOPS_AGE_KEY_FILE}})
+        # Inject the public key into the Sops configuration file using yq.
+        yq eval ".creation_rules[].key_groups[].age = [\"$PUBLIC_KEY\"]" -i {{.SOPS_CONFIG_FILE}}
     status:
       - test -f {{.SOPS_AGE_KEY_FILE}}
+      - test -f {{.SOPS_CONFIG_FILE}}
     preconditions:
-      - which age-keygen
+      - which age-keygen yq
 
   talos:
     desc: Bootstrap the Talos cluster

@@ -5,3 +5,4 @@ Thumbs.db
 kubeconfig
 .decrypted~*.yaml
 *.key
+*.key.bak

@@ -11,10 +11,17 @@ vars:
 tasks:
 
   generate-secret:
-    desc: Generate Talos secret
+    desc: Generate Talos secret, --force creates new secret
     prompt: This will create and encrypt Talos secret... Continue?
     dir: '{{.TALOS_DIR}}'
     cmds:
+      - |
+        {{if .CLI_FORCE}}
+          # Backup the existing secret file if it exists.
+          if [ -f {{.TALHELPER_SECRET_FILE}} ]; then
+            cp {{.TALHELPER_SECRET_FILE}} {{.TALHELPER_SECRET_FILE}}.bak
+          fi
+        {{end}}
       - talhelper gensecret > {{.TALHELPER_SECRET_FILE}}
       - sops --encrypt --in-place {{.TALHELPER_SECRET_FILE}}
     status:
@@ -60,10 +67,18 @@ tasks:
       - which talhelper
 
   reset-cluster:
-    desc: Reset the Talos cluster
+    desc: Reset the Talos cluster, --force wipes the entire disk
     prompt: This will destroy the cluster and reset ALL nodes back to maintenance mode... Continue?
     dir: '{{.TALOS_DIR}}'
-    cmd: talhelper gencommand reset --config-file {{.TALHELPER_CONFIG_FILE}} --env-file {{.TALHELPER_ENV_FILE}} --out-dir {{.TALHELPER_CLUSTER_DIR}} --extra-flags="--reboot --system-labels-to-wipe STATE --system-labels-to-wipe EPHEMERAL --graceful=false --wait=false" | bash
+    cmds:
+      - |
+        {{if .CLI_FORCE}}
+          # Wipes the entire disk.
+          talhelper gencommand reset --config-file {{.TALHELPER_CONFIG_FILE}} --env-file {{.TALHELPER_ENV_FILE}} --out-dir {{.TALHELPER_CLUSTER_DIR}} --extra-flags="--reboot --graceful=false --wait=false" | bash
+        {{else}}
+          # Only wipe the STATE and EPHEMERAL partitions.
+          talhelper gencommand reset --config-file {{.TALHELPER_CONFIG_FILE}} --env-file {{.TALHELPER_ENV_FILE}} --out-dir {{.TALHELPER_CLUSTER_DIR}} --extra-flags="--reboot --system-labels-to-wipe STATE --system-labels-to-wipe EPHEMERAL --graceful=false --wait=false" | bash
+        {{end}}
     preconditions:
       - test -f {{.TALHELPER_CONFIG_FILE}}
       - which talhelper
