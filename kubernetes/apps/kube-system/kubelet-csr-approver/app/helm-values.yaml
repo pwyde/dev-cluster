@@ -1,3 +1,3 @@
 ---
-providerRegex: ^(k8s-1-dev|k8s-2-dev|k8s-3-dev|k8s-4-dev|k8s-5-dev)$
+providerRegex: ^(k8s-dev-1|k8s-dev-2|k8s-dev-3|k8s-dev-4|k8s-dev-5)$
 bypassDnsResolution: true
