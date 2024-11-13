@@ -42,6 +42,7 @@ tasks:
     cmds:
       - for: { var: SECRET_FILES }
         cmd: |
+          # Enhance security by encrypting all unencrypted secrets.
           if sops filestatus "{{.ITEM}}" | jq --exit-status ".encrypted == false" &>/dev/null; then
               echo "Encrypting {{ .ITEM }}"
               sops --encrypt --in-place "{{.ITEM}}"

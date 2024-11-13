@@ -51,6 +51,8 @@ tasks:
       - task: apps
     preconditions:
       - talosctl config info >/dev/null 2>&1
+      - sops filestatus {{.TALHELPER_ENV_FILE}} | jq --exit-status '.encrypted'
+      - sops filestatus {{.TALHELPER_SECRET_FILE}} | jq --exit-status '.encrypted'
       - test -f {{.TALOSCONFIG}}
 
   etcd:
