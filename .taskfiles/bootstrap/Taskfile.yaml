@@ -3,15 +3,13 @@
 version: '3'
 
 vars:
-  BOOTSTRAP_RESOURCES_DIR: '{{.ROOT_DIR}}/.taskfiles/bootstrap/resources'
+  BOOTSTRAP_RESOURCES_DIR: "{{.ROOT_DIR}}/.taskfiles/bootstrap/resources"
   BOOTSTRAP_DIR: "{{.KUBERNETES_DIR}}/bootstrap"
 
 tasks:
 
   age-keygen:
     desc: Bootstrap the Sops age key and update configuration file, --force creates new key
-    vars:
-      PUBLIC_KEY:
     cmds:
       - |
         # Backup existing SOPS_AGE_KEY_FILE and SOPS_CONFIG_FILE if --force flag is used.
@@ -50,7 +48,7 @@ tasks:
       - task: kubeconfig
       - task: apps
     preconditions:
-      - talosctl config info >/dev/null 2>&1
+      - talosctl config info &>/dev/null
       - sops filestatus {{.TALHELPER_ENV_FILE}} | jq --exit-status '.encrypted'
       - sops filestatus {{.TALHELPER_SECRET_FILE}} | jq --exit-status '.encrypted'
       - test -f {{.TALOSCONFIG}}
@@ -74,7 +72,7 @@ tasks:
   apps:
     internal: true
     env:
-      KUBERNETES_DIR: "{{.KUBERNETES_DIR}}"
+      KUBERNETES_DIR: '{{.KUBERNETES_DIR}}'
     cmds:
       - until kubectl wait --for=condition=Ready=False nodes --all --timeout=600s; do sleep 10; done
       - helmfile --file {{.BOOTSTRAP_DIR}}/apps/helmfile.yaml apply --skip-diff-on-install --suppress-diff

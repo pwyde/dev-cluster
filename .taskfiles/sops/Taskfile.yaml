@@ -14,7 +14,7 @@ tasks:
       SECRET_FILES:
         sh: find . -type f -name '*.sops.yaml' ! -name ".sops.yaml"
     cmds:
-      - for: { var: SECRET_FILES }
+      - for: {var: SECRET_FILES}
         cmd: |
           if sops filestatus "{{.ITEM}}" | jq --exit-status ".encrypted == false" &>/dev/null; then
               echo "Encrypting {{ .ITEM }}"
@@ -33,7 +33,7 @@ tasks:
       SECRET_FILES:
         sh: find . -type f -name '*.sops.yaml' ! -name ".sops.yaml"
     cmds:
-      - for: { var: SECRET_FILES }
+      - for: {var: SECRET_FILES}
         cmd: |
           if sops filestatus "{{.ITEM}}" | jq --exit-status ".encrypted == true" &>/dev/null; then
               echo "Decrypting {{ .ITEM }}"

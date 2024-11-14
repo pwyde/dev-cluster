@@ -2,10 +2,13 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: '3'
 
+vars:
+  KUBERNETES_RESOURCES_DIR: "{{.ROOT_DIR}}/.taskfiles/kubernetes/resources"
+
 tasks:
 
-  resources:
-    desc: Gather common resources in the cluster
+  list-resources:
+    desc: List common resources in the cluster
     cmds:
       - for: { var: RESOURCE }
         cmd: kubectl get {{.ITEM}} {{.CLI_ARGS | default "-A"}}
@@ -22,4 +25,50 @@ tasks:
         pods
     preconditions:
       - test -f {{.KUBECONFIG}}
+      - which kubectl
+
+  delete-failed-pods:
+    desc: Delete all pods with an Evicted/Failed/Succeeded status
+    cmds:
+      - for: [Evicted, Failed, Succeeded]
+        cmd: kubectl delete pods --field-selector status.phase={{.ITEM}} -A --ignore-not-found=true
+    preconditions:
+      - which kubectl
+
+  browse-pvc:
+    desc: Browse a PersistentVolumeClaim
+    summary: |
+      Browse a PersistentVolumeClaim
+
+      NS: Namespace to browse PersistentVolumeClaims in (default: default)
+      CLAIM: PersistentVolumeClaim to browse (required)
+
+      Example:
+      task kubernetes:browse-pvc NS=media CLAIM=jellyfin
+    interactive: true
+    requires:
+      vars: [CLAIM]
+    vars:
+      NS: '{{.NS | default "default"}}'
+    cmd: kubectl browse-pvc --namespace {{.NS}} {{.CLAIM}}
+    preconditions:
+      - kubectl --namespace {{.NS}} get persistentvolumeclaims {{.CLAIM}}
+      - which kubectl
+
+  privileged-pod:
+    desc: Run a privileged pod
+    summary: |
+      Run a privileged pod
+
+      NODE: Name of node to run privileged pod on
+
+      Example:
+      task kubernetes:privileged-pod NODE=k8s-1
+    env:
+      NODE: '{{.NODE}}'
+    cmd: |
+      kubectl run privileged-{{.NODE}} -i --rm --image=null \
+        --overrides="$(yq {{.KUBERNETES_RESOURCES_DIR}}/privileged-pod.tmpl.yaml -o=json | envsubst)"
+    preconditions:
+      - test -f {{.KUBERNETES_RESOURCES_DIR}}/privileged-pod.tmpl.yaml
       - which kubectl
