@@ -45,7 +45,7 @@
     "volsync": "folder_cloud"
   },
   "editor.bracketPairColorization.enabled": true,
-  "editor.fontFamily": "FiraCode Nerd Font Ret",
+  "editor.fontFamily": "FiraCode Nerd Font",
   "editor.fontLigatures": true,
   "editor.guides.bracketPairs": true,
   "editor.guides.bracketPairsHorizontal": true,
