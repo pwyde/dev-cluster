@@ -10,6 +10,7 @@ jq
 krew
 kubectl-bin
 kustomize
+minio-client
 moreutils
 sops
 stern-bin
