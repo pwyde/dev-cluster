@@ -34,3 +34,4 @@ metadata:
   namespace: flux-system
 stringData:
   SECRET_DOMAIN: op://$VAULT/domains/PRIVATE_DOMAIN
+  SECRET_EMAIL: op://$VAULT/smtp/ADMIN_EMAIL
