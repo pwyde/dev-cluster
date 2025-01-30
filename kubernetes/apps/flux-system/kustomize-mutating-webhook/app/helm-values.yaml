@@ -41,6 +41,5 @@ configMaps:
 secrets:
   - name: cluster-secrets
     optional: false
-
 env:
   LOG_LEVEL: debug
