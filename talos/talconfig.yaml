@@ -1,0 +1,131 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/budimanjojo/talhelper/master/pkg/config/schemas/talconfig.json
+---
+# renovate: datasource=docker depName=ghcr.io/siderolabs/installer
+talosVersion: v1.9.2
+# renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
+kubernetesVersion: v1.32.1
+
+clusterName: ${clusterName}
+endpoint: https://${clusterName}.${clusterDNSSuffix}:6443
+
+clusterPodNets:
+  - 10.69.0.0/16
+clusterSvcNets:
+  - 10.96.0.0/16
+
+additionalApiServerCertSans: &sans
+  - ${clusterEndpointIP}
+  - ${clusterName}.${clusterDNSSuffix}
+  - k8s.${clusterDNSSuffix}
+  - 127.0.0.1
+
+additionalMachineCertSans: *sans
+
+# Disable built-in Flannel to use Cilium.
+cniConfig:
+  name: none
+
+nodes:
+  - hostname: talos-dev-1
+    ipAddress: 192.168.20.31
+    installDisk: /dev/sda
+    controlPlane: true
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: bc:24:11:4a:7a:e1
+        dhcp: false
+        addresses:
+          - 192.168.20.31/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 192.168.20.1
+        mtu: 1500
+        vip: &vip
+          ip: ${clusterEndpointIP}
+      - deviceSelector:
+          hardwareAddr: bc:24:11:ca:a8:a9
+        dhcp: false
+        addresses:
+          - 10.0.100.31/24
+        routes:
+          - network: 10.0.100.0/24
+            gateway: 10.0.100.1
+        mtu: 1500
+  - hostname: talos-dev-2
+    ipAddress: 192.168.20.32
+    installDisk: /dev/sda
+    controlPlane: true
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: bc:24:11:4d:2b:6a
+        dhcp: false
+        addresses:
+          - 192.168.20.32/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 192.168.20.1
+        mtu: 1500
+        vip: *vip
+      - deviceSelector:
+          hardwareAddr: bc:24:11:50:64:2d
+        dhcp: false
+        addresses:
+          - 10.0.100.32/24
+        routes:
+          - network: 10.0.100.0/24
+            gateway: 10.0.100.1
+        mtu: 1500
+  - hostname: talos-dev-3
+    ipAddress: 192.168.20.33
+    installDisk: /dev/sda
+    controlPlane: true
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: bv:24:11:80:20:56
+        dhcp: false
+        addresses:
+          - 192.168.20.33/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 192.168.20.1
+        mtu: 1500
+        vip: *vip
+      - deviceSelector:
+          hardwareAddr: bc:24:11:d7:80:a3
+        dhcp: false
+        addresses:
+          - 10.0.100.33/24
+        routes:
+          - network: 10.0.100.0/24
+            gateway: 10.0.100.1
+        mtu: 1500
+
+# Global configurations and patches.
+patches:
+  - "@./patches/global/machine-features.yaml"
+  - "@./patches/global/machine-files.yaml"
+  - "@./patches/global/machine-kubelet.yaml"
+  - "@./patches/global/machine-network.yaml"
+  - "@./patches/global/machine-sysctl.yaml"
+  - "@./patches/global/machine-time.yaml"
+
+# Controller configurations and patches.
+controlPlane:
+  schematic: &schematic
+    customization:
+      extraKernelArgs:
+        - net.ifnames=0
+      systemExtensions:
+        officialExtensions:
+          - siderolabs/amd-ucode
+          - siderolabs/iscsi-tools
+          - siderolabs/qemu-guest-agent
+          - siderolabs/util-linux-tools
+  patches:
+    - "@./patches/controller/api-access.yaml"
+    - "@./patches/controller/admission-controller-patch.yaml"
+    - "@./patches/controller/cluster.yaml"
+
+# Worker configurations and patches.
+worker:
+  schematic: *schematic
