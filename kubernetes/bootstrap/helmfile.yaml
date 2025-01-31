@@ -48,7 +48,7 @@ releases:
       - kube-system/coredns
 
   - name: external-secrets
-    namespace: external-secrets
+    namespace: security
     chart: oci://ghcr.io/external-secrets/charts/external-secrets
     version: 0.13.0
     values:
