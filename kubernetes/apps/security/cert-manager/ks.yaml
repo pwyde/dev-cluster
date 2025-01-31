@@ -32,6 +32,8 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
+    - name: kustomize-mutating-webhook
+      namespace: flux-system
     - name: onepassword-store
       namespace: security
   path: ./kubernetes/apps/security/cert-manager/issuers
