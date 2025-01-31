@@ -8,6 +8,6 @@ resources:
   - ./flux-operator/ks.yaml
   - ./kustomize-mutating-webhook/ks.yaml
 components:
-  - ../../flux/components/alerts/alertmanager
+  - ../../flux/components/alerts
   - ../../flux/components/namespace
   - ../../flux/components/sops
