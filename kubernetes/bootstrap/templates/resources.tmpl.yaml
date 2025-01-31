@@ -26,12 +26,12 @@ metadata:
 stringData:
   age.agekey: |
     op://$VAULT/flux/FLUX_SOPS_PRIVATE_KEY
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: cluster-secrets
-  namespace: flux-system
-stringData:
-  SECRET_DOMAIN: op://$VAULT/domains/PRIVATE_DOMAIN
-  SECRET_EMAIL: op://$VAULT/smtp/ADMIN_EMAIL
+# ---
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: cluster-secrets
+#   namespace: flux-system
+# stringData:
+#   SECRET_DOMAIN: op://$VAULT/domains/PRIVATE_DOMAIN
+#   SECRET_EMAIL: op://$VAULT/smtp/ADMIN_EMAIL
