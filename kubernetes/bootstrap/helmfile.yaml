@@ -14,6 +14,9 @@ repositories:
   - name: jetstack
     url: https://charts.jetstack.io
 
+  - name: fluxcd-kustomize-mutating-webhook
+    url: https://xunholy.github.io/fluxcd-kustomize-mutating-webhook
+
 releases:
   - name: kube-prometheus-stack-crds
     namespace: observability
