@@ -10,6 +10,9 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  dependsOn:
+    - name: kustomize-mutating-webhook
+      namespace: flux-system
   path: ./kubernetes/apps/security/cert-manager/app
   prune: true
   sourceRef:
@@ -32,8 +35,8 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
-    - name: kustomize-mutating-webhook
-      namespace: flux-system
+    - name: cert-manager
+      namespace: security
     - name: onepassword-store
       namespace: security
   path: ./kubernetes/apps/security/cert-manager/issuers
