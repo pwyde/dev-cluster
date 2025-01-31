@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: cert-manager
-      namespace: cert-manager
+      namespace: security
     - name: onepassword-store
       namespace: security
   path: ./kubernetes/apps/flux-system/kustomize-mutating-webhook/app
