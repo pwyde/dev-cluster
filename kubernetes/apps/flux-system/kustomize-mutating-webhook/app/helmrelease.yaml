@@ -62,6 +62,8 @@ spec:
           SVC_JELLYFIN_IP: "192.168.20.74"
           # Service Ports
           SVC_QBITTORRENT_PORT: "60112"
-    secrets: []
+    secrets:
+      - name: cluster-secrets
+        optional: false
     env:
       LOG_LEVEL: debug
