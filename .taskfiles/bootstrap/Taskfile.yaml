@@ -69,6 +69,7 @@ tasks:
     cmds:
       - until kubectl wait nodes --for=condition=Ready=False --all --timeout=600s; do sleep 10; done
       - op inject --in-file {{.KUBERNETES_DIR}}/bootstrap/templates/resources.tmpl.yaml | kubectl apply --server-side --filename -
+      - sops exec-file {{.KUBERNETES_DIR}}/flux/meta/settings/cluster-secrets.sops.yaml "kubectl apply --server-side --filename {}"
       - helmfile --file {{.KUBERNETES_DIR}}/bootstrap/helmfile.yaml apply --skip-diff-on-install --suppress-diff
     env:
       VAULT: Kubernetes
