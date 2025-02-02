@@ -39,16 +39,16 @@ spec:
     provider: sops
     secretRef:
       name: sops-age
-  postBuild:
-    substituteFrom:
-      - name: cluster-settings
-        kind: ConfigMap
-        optional: true
-      - kind: Secret
-        name: cluster-secrets
-        optional: true
+  # postBuild:
+  #   substituteFrom:
+  #     - name: cluster-settings
+  #       kind: ConfigMap
+  #       optional: true
+  #     - kind: Secret
+  #       name: cluster-secrets
+  #       optional: true
   patches:
-    - # Add SOPS decryption and postBuild substitutions to child Kustomizations.
+    - # Add postBuild substitutions to child Kustomizations.
       patch: |-
         apiVersion: kustomize.toolkit.fluxcd.io/v1
         kind: Kustomization
