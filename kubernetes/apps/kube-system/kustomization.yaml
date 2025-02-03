@@ -3,6 +3,11 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: kube-system
+components:
+  - ../../components/alerts
+  - ../../components/global-vars
+  - ../../components/namespace
+  - ../../components/sops
 resources:
   # Flux-Kustomizations
   - ./cilium/ks.yaml
@@ -13,6 +18,3 @@ resources:
   - ./node-problem-detector/ks.yaml
   - ./reloader/ks.yaml
   - ./spegel/ks.yaml
-components:
-  - ../../flux/components/alerts
-  - ../../flux/components/namespace

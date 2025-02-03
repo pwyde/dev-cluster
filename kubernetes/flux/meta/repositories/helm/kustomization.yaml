@@ -14,8 +14,6 @@ resources:
   - ./democratic-csi.yaml
   - ./external-dns.yaml
   - ./external-secrets.yaml
-  - ./fluxcd-community.yaml
-  - ./fluxcd-kustomize-mutating-webhook.yaml
   - ./grafana.yaml
   - ./ingress-nginx.yaml
   - ./jetstack.yaml

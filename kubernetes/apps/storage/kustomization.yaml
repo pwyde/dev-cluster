@@ -3,13 +3,15 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: storage
+components:
+  - ../../components/alerts
+  - ../../components/global-vars
+  - ../../components/namespace
+  - ../../components/sops
 resources:
   # Flux-Kustomizations
   # - ./democratic-csi/ks.yaml
   # - ./minio/ks.yaml
   - ./openebs/ks.yaml
-  - ./snapshot-controller/ks.yaml
+  # - ./snapshot-controller/ks.yaml
   # - ./volsync/ks.yaml
-components:
-  - ../../flux/components/alerts
-  - ../../flux/components/namespace

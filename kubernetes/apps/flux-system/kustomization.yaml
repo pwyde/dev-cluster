@@ -3,11 +3,11 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: flux-system
+components:
+  - ../../components/alerts
+  - ../../components/global-vars
+  - ../../components/namespace
+  - ../../components/sops
 resources:
   # Flux-Kustomizations
   - ./flux-operator/ks.yaml
-  - ./kustomize-mutating-webhook/ks.yaml
-components:
-  - ../../flux/components/alerts
-  - ../../flux/components/namespace
-  - ../../flux/components/sops
