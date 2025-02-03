@@ -14,5 +14,4 @@ resources:
   - ./minio/ks.yaml
   - ./openebs/ks.yaml
   - ./snapshot-controller/ks.yaml
-  - ./an/obious/error/ks.yaml
   # - ./volsync/ks.yaml
