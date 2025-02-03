@@ -4,7 +4,6 @@ kind: ConfigMap
 metadata:
   name: cluster-settings
 data:
-  COMPONENT_GLOBAL_VARS_CONFIGMAP: "test"
   # Configuration
   CONFIG_TIMEZONE: "Europe/Stockholm"
   CONFIG_APP_UID: '"5000"'
