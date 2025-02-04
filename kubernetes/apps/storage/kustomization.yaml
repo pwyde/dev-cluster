@@ -10,8 +10,8 @@ components:
   - ../../components/sops
 resources:
   # Flux-Kustomizations
-  - ./democratic-csi/ks.yaml
+  # - ./democratic-csi/ks.yaml
   # - ./minio/ks.yaml
   - ./openebs/ks.yaml
-  - ./snapshot-controller/ks.yaml
+  # - ./snapshot-controller/ks.yaml
   # - ./volsync/ks.yaml
