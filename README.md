@@ -7,3 +7,5 @@
 ... managed with Flux, Renovate and GitHub Actions
 
 </div>
+
+This repository is used for testing and development.
