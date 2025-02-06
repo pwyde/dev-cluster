@@ -34,7 +34,9 @@
     "security": "folder_admin",
     "self-hosted": "folder_public",
     "storage": "folder_content",
+    "system": "folder_kubernetes",
     "system-upgrade": "folder_components",
+    "system-upgrade-controller": "folder_components",
     "utilities": "folder_utils",
     // folders
     "cert-manager": "folder_coverage",
@@ -94,7 +96,9 @@
     "security": "guard",
     "self-hosted": "home",
     "storage": "dump",
+    "system": "kubernetes",
     "system-upgrade": "update",
+    "system-upgrade-controller": "update",
     "utilities": "utils",
     // folders
     "cert-manager": "guard",

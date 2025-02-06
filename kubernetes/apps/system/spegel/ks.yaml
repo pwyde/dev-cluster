@@ -3,24 +3,19 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app ingress-nginx-internal
-  namespace: &namespace network
+  name: &app spegel
+  namespace: &namespace system
 spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  dependsOn:
-    - name: cert-manager-certificates
-      namespace: security
-    - name: onepassword-store
-      namespace: security
   interval: 30m
-  path: ./kubernetes/apps/network/ingress-nginx/internal
+  path: ./kubernetes/apps/system/spegel/app
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
   targetNamespace: *namespace
-  timeout: 15m
+  timeout: 5m
   wait: false

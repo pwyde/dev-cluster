@@ -3,17 +3,14 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app kube-prometheus-stack-dev
-  namespace: &namespace observability
+  name: &app system-upgrade-controller
+  namespace: &namespace system
 spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  dependsOn:
-    - name: onepassword-store
-      namespace: security
   interval: 30m
-  path: ./kubernetes/apps/observability/kube-prometheus-stack/app
+  path: ./kubernetes/apps/system/system-upgrade-controller/app
   prune: true
   sourceRef:
     kind: GitRepository
@@ -21,25 +18,34 @@ spec:
     namespace: flux-system
   targetNamespace: *namespace
   timeout: 5m
-  wait: false
+  wait: true
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app kube-prometheus-stack-crds
-  namespace: &namespace observability
+  name: &app system-upgrade-plans
+  namespace: &namespace system
 spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  dependsOn:
+    - name: system-upgrade-controller
+      namespace: system
   interval: 30m
-  path: ./kubernetes/apps/observability/kube-prometheus-stack/crds
-  prune: false # Should never be deleted.
+  path: ./kubernetes/apps/system/system-upgrade-controller/plans
+  postBuild:
+    substitute:
+      # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
+      TALOS_VERSION: v1.9.2
+      # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
+      KUBERNETES_VERSION: v1.32.1
+  prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
   targetNamespace: *namespace
   timeout: 5m
-  wait: false
+  wait: true
